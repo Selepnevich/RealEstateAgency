@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %} {{title}} {% endblock %}
+
+{% block body %}
+
+<section class="catalog-section py-5 container-lg">
+        <h2 class="text-center mb-3">Сделки клиента </h2>
+        <div class="container text-center mt-5">
+            <div class="row align-items-start">
+                <div class="col-12 col-md-4 mb-2">
+                    <div class="card text-start">
+                        <div class="card-body">
+                          <h5 class="card-title">Клиент</h5>
+                        </div>
+                        <p>Данные клиента</p>
+                      </div>
+                      <div class="card text-start">
+                        <div class="card-body">
+                          <h5 class="card-title">Риелтор</h5>
+                        </div>
+                        <p>Данные риелтора</p>
+                      </div>
+                </div>
+                <div class="col-12 col-md-4 mb-2">
+                    <div class="card text-start">
+                        <div class="card-body">
+                          <h5 class="card-title">Добавить недвижимость</h5>
+                        </div>
+                          <div class="card card-body">
+                            <form action="{{url_for('add_realty')}}" method="POST">
+                              <div class="form-group">
+                                <input type="text" class="form-control" name="object_type" placeholder="Тип объекта">
+                              </div>
+                              <div class="form-group">
+                                <input type="text" class="form-control" name="location" placeholder="Местоположение">
+                              </div>
+                              <div class="form-group">
+                                <input type="text" class="form-control" name="price" placeholder="Цена">
+                              </div>
+                              <div class="form-group">
+                                <input type="text" class="form-control" name="area" placeholder="Площадь">
+                              </div>
+                              <div class="form-group">
+                                <select class="form-control" name="num_rooms" placeholder="Количество комнат">
+                                   <option value="apple">1</option>
+                                   <option value="apple">2</option>
+                                   <option value="apple">3</option>
+                                   <option value="apple">4+</option>
+                                </select>
+                              </div>
+                              <div class="form-group">
+                                <input type="text" class="form-control" name="description" placeholder="Описание">
+                              </div>
+                              <button class="btn btn-primary btn-block">
+                                Сохранить
+                              </button>
+                            </form>
+                          </div>
+                </div>
+              </div>
+            </div>
+</section>
+
+{% endblock %}

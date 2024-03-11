@@ -1,0 +1,19 @@
+
+.layout-content {
+    position: relative;
+    background: linear-gradient( rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3) ), url('static/img/main-bg.avif');
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 700px;
+}
+.catalog-section {
+    min-height: 700px;
+}
+
+.catalog-section {
+    min-height: 700px;
+}
+
+.adds {
+    min-height: 700px;
+}
