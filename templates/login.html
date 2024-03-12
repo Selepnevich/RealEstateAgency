@@ -13,7 +13,7 @@
         <h3 class="card-title text-center">Войти</h3>
         <p>Пожалуйста, введите свое имя пользователя и пароль</p>
         <div class="card card-body">
-          <form action="{{url_for('add_user')}}" method="POST">
+          <form action="{{url_for('login')}}" method="POST">
             <div class="form-group">
               <input type="text" class="form-control" name="username" placeholder="Имя пользователя">
             </div>
@@ -38,7 +38,7 @@
     {% endfor %}
     {% endif %}
     {% endwith %}
-    <p>Нет учетной записи <a href="{{ url_for('login') }}">Зарегистрироваться</a></p>
+    <p>Нет учетной записи <a href="{{ url_for('registration') }}">Зарегистрироваться</a></p>
       </div>
     </div>
   <div>

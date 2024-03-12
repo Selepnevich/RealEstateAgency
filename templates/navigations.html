@@ -20,10 +20,10 @@
         </ul>
           <div class="tab-content d-flex justify-content-center" id="pills-tabContent">
             <div class="tab-pane fade show active bg-light rounded-3" id="pills-buy" role="tabpanel" aria-labelledby="pills-buy-tab" tabindex="0">
-                <form class="filter d-flex">
-                    <select class="form-select w-25" aria-label="Default select example">
+                <form action="{{url_for('search')}}" class="filter d-flex">
+                    <select name="object_type" class="form-select w-25" aria-label="Default select example">
                         <option selected>Квартиру</option>
-                        <option value="1">Комнату</option>
+                        <option value="1">Офисное помещение</option>
                         <option value="2">Дом</option>
                         <option value="3">Дачу</option>
                     </select>

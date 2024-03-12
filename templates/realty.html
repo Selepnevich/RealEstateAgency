@@ -8,19 +8,21 @@
 	<h2>Купить квартиру</h2>
 	<div class="adds-container mt-5">
 		<div class="card mb-3 position-relative" style="max-width: 900px">
-			<div class="row g-0">
-				<div class="col-md-4">
+			{% for real in list_realty %}
+			<div class="row g-0" style="padding: 10;">
+
+				<div class="col-md-4"  style="padding: 10;">
 					<img
-						src=f"static/img/flats/flat_1.jpg"
+						src="static/img/flats/flat_1.jpg"
 						class="img-fluid rounded-start"
 						alt="..."
 					/>
 				</div>
 				<div class="col-md-8">
 					<div class="card-body">
-						{% for real in list_realty%}
+						
 						<h5 class="card-title">
-							{{real.object_type}}, {{real.square}},
+							{{real.object_type}}, {{real.square}} м²,
 							{{real.num_rooms}}-комнатная
 						</h5>
 						<div
@@ -41,10 +43,12 @@
 							</li>
 						</ul>
 						<p class="card-text">{{real.description}}</p>
-						{% endfor %}
+						
 					</div>
 				</div>
+
 			</div>
+			{% endfor %}
 		</div>
 	</div>
 </section>
