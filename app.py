@@ -10,6 +10,7 @@ from flask_login import LoginManager, login_user, login_required
 from werkzeug.utils import secure_filename
 from UserLogin import UserLogin
 import re 
+import datetime
 
 # dbase = FDataBase(db)
 
@@ -35,45 +36,51 @@ migrate = Migrate(app, db)
 def index():
   if 'loggedin' in session:
         return render_template('index.html', username=session['username'])
-  
-  cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-  if request.method == 'POST' and 'fname' in request.form  \
+  return render_template('index.html', title ='Главная')   
+
+
+@app.route("/add_ticket", methods=['POST'])
+def add_ticket():
+   if request.method == 'POST' and 'fname' in request.form  \
     and 'lname' in request.form \
     and 'phone' in request.form:
+      cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
       fname=request.form['fname']
-      print(fname)
       lname=request.form['lname']
       email=request.form['email']
       phone=request.form['phone']
-      print(fname,lname,email,phone)
-    # # Добавление данных в Таблицу "Клиенты"
-    #   cur.execute('INSERT INTO public."Customers"(fname,lname,email,phone)\
-    #               VALUES (%s,%s,%s,%s)', \
-    #               (fname,lname,email,phone))
-    #   conn.commit()
+      cur.execute(f'SELECT phone FROM public."Customers" WHERE phone= \'{phone}\'')
+      list_phone = cur.fetchone()
+      if phone!=list_phone:
+          # Добавление данных в Таблицу "Клиенты"
+          cur.execute('INSERT INTO public."Customers"(fname,lname,email,phone)\
+                      VALUES (%s,%s,%s,%s)', \
+                      (fname,lname,email,phone))
+          conn.commit()
 
-    #   # Запрос возвращает id Клиента который отправил данные
-    #   customer_id = f'SELECT id FROM public."Customers" WHERE fname ={fname}'
+      # Запрос возвращает id Клиента который отправил данные
+      customer_id = cur.execute(f'SELECT id FROM public."Customers" WHERE fname = \'{fname}\'')
+      customer_id = cur.fetchone()[0]
 
-    #   #Запрос определяющий агентов с наименьшим количеством запросов
-    #   agent_id = 'SELECT a.id, COALESCE(t.ticket_count, 0) AS queries_count\
-    #               FROM public."Agents" as a\
-    #               LEFT JOIN (\
-    #                   SELECT agent_id, COUNT(*) AS ticket_count\
-    #                   FROM public."Tickets"\
-    #                   GROUP BY agent_id\
-    #               ) AS t ON a.id = t.agent_id\
-    #               ORDER BY COALESCE(t.ticket_count, 0)\
-    #               LIMIT 1'
-      
-    #   #Добавление данных в таблицу "Заявки"
-    #   cur.execute('INSERT INTO public."Tickets"(customer_id,agent_id)\
-    #                VALUES (%s,%s)', \
-    #               (customer_id, agent_id))
-    #   conn.commit()
-    #   flash('Ваша заявка отправлена, в течении дня с вами свяжется наш агент')
-    #   return redirect(url_for('index'))
-  return render_template('index.html', title ='Главная')   
+      #Запрос определяющий агентов с наименьшим количеством запросов
+      agent_id = cur.execute('SELECT a.id AS queries_count\
+                  FROM public."Agents" as a\
+                  LEFT JOIN (\
+                      SELECT agent_id, COUNT(*) AS ticket_count\
+                      FROM public."Tickets"\
+                      GROUP BY agent_id\
+                  ) AS t ON a.id = t.agent_id\
+                  ORDER BY COALESCE(t.ticket_count, 0)\
+                  LIMIT 1')
+      agent_id = cur.fetchone()[0]
+
+      #Добавление данных в таблицу "Заявки"
+      cur.execute('INSERT INTO public."Tickets"(customer_id,agent_id, tickets_start_date)\
+                   VALUES (%s,%s,%s)', \
+                  (customer_id, agent_id, datetime.datetime.now()))
+      conn.commit()
+      flash('Ваша заявка отправлена, в течении дня с вами свяжется наш агент')
+      return redirect(url_for('index'))
 
 #Страница недвижимость 
 
@@ -90,8 +97,17 @@ def realty():
 @app.route("/clients")
 def clients():
   cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-  s = 'SELECT * FROM public."Customers"'
-  cur.execute(s)
+  cur.execute( f'SELECT a.id\
+              FROM public."User" as u\
+              INNER JOIN public."Profile" as p ON u.id = p.user_id\
+              INNER JOIN public."Agents" as a ON a.id = p.agent_id \
+              WHERE u.username = \'{session['username']}\'')
+  id_agent = cur.fetchone()[0]
+  cur.execute(f' SELECT c.id, c.fname, c.lname, c.phone, c.email, t.tickets_start_date \
+              FROM public."Tickets" as t\
+              INNER JOIN public."Agents" as a ON a.id = t.agent_id\
+              INNER JOIN public."Customers" as c ON c.id = t.customer_id\
+              WHERE a.id = \'{id_agent}\'')
   list_customers = cur.fetchall()
   return render_template('clients.html', title ='Добавить клиента',\
                          list_customers=list_customers)
@@ -104,12 +120,30 @@ def add_client():
       lname=request.form['lname']
       email=request.form['email']
       phone=request.form['phone']
-      cur.execute('INSERT INTO public."Customers" (fname,lname,email,phone)\
-                  VALUES (%s,%s,%s,%s)', \
-                  (fname,lname,email,phone))
-      conn.commit()
-      flash('Клиент успешно добавлен')
-      return redirect(url_for('add_client'))
+      cur.execute(f'SELECT phone FROM public."Customers" WHERE phone= \'{phone}\'')
+      list_phone = cur.fetchone()
+      print(list_phone)
+      if phone!=list_phone:
+          cur.execute('INSERT INTO public."Customers" (fname,lname,email,phone)\
+                      VALUES (%s,%s,%s,%s)', \
+                      (fname,lname,email,phone))
+          conn.commit()
+          customer_id = cur.execute(f'SELECT id FROM public."Customers" WHERE fname = \'{fname}\'')
+          customer_id = cur.fetchone()[0]
+          cur.execute( f'SELECT a.id\
+              FROM public."User" as u\
+              INNER JOIN public."Profile" as p ON u.id = p.user_id\
+              INNER JOIN public."Agents" as a ON a.id = p.agent_id \
+              WHERE u.username = \'{session['username']}\'')
+          agent_id = cur.fetchone()[0]
+          cur.execute('INSERT INTO public."Tickets"(customer_id,agent_id, tickets_start_date)\
+                   VALUES (%s,%s,%s)', \
+                  (customer_id, agent_id, datetime.datetime.now()))
+          conn.commit()
+          flash('Клиент успешно добавлен')
+          return redirect(url_for('clients'))
+      else:
+         flash('Невозможно добавить клиента')
   
 
 @app.route("/list_deal")
@@ -155,6 +189,9 @@ def login():
 def registration():
     cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if request.method == 'POST' and 'username' in request.form and 'password' in request.form:
+        fname=request.form['fname']
+        lname=request.form['lname']
+        email=request.form['email']
         username = request.form['username']
         password = request.form['password']
         password2 = request.form['password2']
@@ -174,7 +211,19 @@ def registration():
         elif password != password2:
            flash('Пароли не совпадают')
         else:
-            cursor.execute('INSERT INTO public."User"( username, password) VALUES (%s,%s)', (username, _hashed_password))
+            #Добавление пользователя
+            cursor.execute('INSERT INTO public."User"(username, password) VALUES (%s,%s)', (username, _hashed_password))
+            conn.commit()
+
+            #Добавление агента
+            cursor.execute('INSERT INTO public."Agents"(fname, lname, email) VALUES (%s,%s,%s)', (fname, lname, email))
+            conn.commit()
+
+            user_id = cursor.execute(f'SELECT id FROM public."User" WHERE username= \'{username}\'')
+            user_id = cursor.fetchone()[0]
+            agent_id = cursor.execute(f'SELECT id FROM public."Agents" WHERE fname= \'{fname}\'')
+            agent_id = cursor.fetchone()[0]
+            cursor.execute('INSERT INTO public."Profile"(user_id, agent_id) VALUES (%s,%s)', (user_id, agent_id))
             conn.commit()
             flash('Вы успешно зарегистрировались!')
             return redirect(url_for('login'))
@@ -193,13 +242,25 @@ def logout():
 @app.route("/profile", methods=['GET','POST'])
 def profile():
   cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-  cur.execute( f'SELECT username, fname, lname, phone, email\
-    FROM public."User" as u\
-    INNER JOIN public."Profile" as p ON u.id = p.user_id\
-    INNER JOIN public."Agents" as a ON a.id = p.agent_id \
-    WHERE u.username = \'{session['username']}\'')
+  if not {session['username']}:
+      return redirect(url_for('login'))
+  cur.execute( f'SELECT a.id, u.username, a.fname, a.lname, a.phone, a.email\
+              FROM public."User" as u\
+              INNER JOIN public."Profile" as p ON u.id = p.user_id\
+              INNER JOIN public."Agents" as a ON a.id = p.agent_id \
+              WHERE u.username = \'{session['username']}\'')
   data_profile = cur.fetchall()
-  return render_template('profile.html', title="Профиль", data_profile=data_profile)
+
+  cur.execute(f' SELECT c.fname, c.lname, c.phone, c.email, t.tickets_start_date \
+              FROM public."Tickets" as t\
+              INNER JOIN public."Agents" as a ON a.id = t.agent_id\
+              INNER JOIN public."Customers" as c ON c.id = t.customer_id\
+              WHERE a.id = \'{data_profile[0][0]}\'')
+  data_ticket = cur.fetchall()
+
+  return render_template('profile.html', title="Профиль", data_profile=data_profile, data_ticket=data_ticket)
+
+    
 
 
 

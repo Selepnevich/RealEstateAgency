@@ -11,7 +11,7 @@ class Customers(db.Model):
   id=Column(Integer,primary_key=True, autoincrement=True)
   fname=Column(String(40), nullable=False)
   lname=Column(String(40), nullable=False)
-  email=Column(String(40))
+  email=Column(String(40), nullable=False, unique=True)
   phone=Column(String(30), unique=True)
  
   def __init__(self,fname,lname,email,phone):
@@ -44,9 +44,9 @@ class Agents(db.Model):
     id = Column(Integer, primary_key=True)
     fname = Column(String(40), nullable=False)
     lname = Column(String(40), nullable=False)
-    email = Column(String(40))
+    email = Column(String(40), nullable=False)
     phone = Column(String(30), unique=True)
-    salary = Column(Integer, nullable=False)
+    salary = Column(Integer)
 
     def __init__(self,fname,lname,email,phone,salary):
       self.fname=fname
