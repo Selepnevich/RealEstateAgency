@@ -37,17 +37,42 @@ def index():
         return render_template('index.html', username=session['username'])
   
   cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-  if request.method == 'POST':
+  if request.method == 'POST' and 'fname' in request.form  \
+    and 'lname' in request.form \
+    and 'phone' in request.form:
       fname=request.form['fname']
+      print(fname)
       lname=request.form['lname']
       email=request.form['email']
       phone=request.form['phone']
-      cur.execute('INSERT INTO public."Customers"(fname,lname,email,phone)\
-                   VALUES (%s,%s,%s,%s)', \
-                  (fname,lname,email,phone))
-      conn.commit()
-      flash('Ваша заявка отправлена, в течении дня с вами свяжется наш агент')
-      return redirect(url_for('index'))
+      print(fname,lname,email,phone)
+    # # Добавление данных в Таблицу "Клиенты"
+    #   cur.execute('INSERT INTO public."Customers"(fname,lname,email,phone)\
+    #               VALUES (%s,%s,%s,%s)', \
+    #               (fname,lname,email,phone))
+    #   conn.commit()
+
+    #   # Запрос возвращает id Клиента который отправил данные
+    #   customer_id = f'SELECT id FROM public."Customers" WHERE fname ={fname}'
+
+    #   #Запрос определяющий агентов с наименьшим количеством запросов
+    #   agent_id = 'SELECT a.id, COALESCE(t.ticket_count, 0) AS queries_count\
+    #               FROM public."Agents" as a\
+    #               LEFT JOIN (\
+    #                   SELECT agent_id, COUNT(*) AS ticket_count\
+    #                   FROM public."Tickets"\
+    #                   GROUP BY agent_id\
+    #               ) AS t ON a.id = t.agent_id\
+    #               ORDER BY COALESCE(t.ticket_count, 0)\
+    #               LIMIT 1'
+      
+    #   #Добавление данных в таблицу "Заявки"
+    #   cur.execute('INSERT INTO public."Tickets"(customer_id,agent_id)\
+    #                VALUES (%s,%s)', \
+    #               (customer_id, agent_id))
+    #   conn.commit()
+    #   flash('Ваша заявка отправлена, в течении дня с вами свяжется наш агент')
+    #   return redirect(url_for('index'))
   return render_template('index.html', title ='Главная')   
 
 #Страница недвижимость 
@@ -86,11 +111,6 @@ def add_client():
       flash('Клиент успешно добавлен')
       return redirect(url_for('add_client'))
   
-@app.route("/search", methods=['POST'])
-def search():
-  if request.method == 'POST':
-    object_type=request.form['object_type']
-    return redirect(url_for('add_client'))
 
 @app.route("/list_deal")
 def list_deal():
@@ -169,15 +189,17 @@ def logout():
    session.pop('id', None)
    session.pop('username', None)
    return redirect(url_for('login'))
-
-@app.route("/add_user")
-def add_user():
-   pass
    
-@app.route("/check_user", methods=['GET','POST'])
-def check_user():
-   pass
-
+@app.route("/profile", methods=['GET','POST'])
+def profile():
+  cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+  cur.execute( f'SELECT username, fname, lname, phone, email\
+    FROM public."User" as u\
+    INNER JOIN public."Profile" as p ON u.id = p.user_id\
+    INNER JOIN public."Agents" as a ON a.id = p.agent_id \
+    WHERE u.username = \'{session['username']}\'')
+  data_profile = cur.fetchall()
+  return render_template('profile.html', title="Профиль", data_profile=data_profile)
 
 
 

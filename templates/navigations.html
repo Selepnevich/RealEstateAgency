@@ -20,7 +20,7 @@
         </ul>
           <div class="tab-content d-flex justify-content-center" id="pills-tabContent">
             <div class="tab-pane fade show active bg-light rounded-3" id="pills-buy" role="tabpanel" aria-labelledby="pills-buy-tab" tabindex="0">
-                <form action="{{url_for('search')}}" class="filter d-flex">
+                <form class="filter d-flex">
                     <select name="object_type" class="form-select w-25" aria-label="Default select example">
                         <option selected>Квартиру</option>
                         <option value="1">Офисное помещение</option>
@@ -69,22 +69,38 @@
                 <div>
                 <h3 style="text-align: center">Подать заявку:</h3>
                 </div>
-                <form class="filter d-flex">
+                <form action="{{url_for('index')}}" class="filter d-flex" method="POST">
                     <select class="form-select w-50" aria-label="Default select example">
                         <option selected>Квартиру</option>
                         <option value="1">Комнату</option>
                         <option value="2">Дом</option>
                         <option value="3">Дачу</option>
                     </select>
-                    <input class="form-control" type="text" id="fname" name="fname" placeholder="Ваше имя" aria-label="name">
-                    <input class="form-control" type="text" id="lname" name="lname" placeholder="Ваше имя" aria-label="name">
-                    <input class="form-control" type="text" id="phone" name="phone" placeholder="Ваш телефон" aria-label="name" data-onlydigits>
+                    <input class="form-control" type="text" name="fname"
+                    placeholder="Ваша Фамилия">
+                    <input class="form-control" type="text" name="lname"
+                    placeholder="Ваше имя">
+                    <input class="form-control" type="text" name="phone" 
+                    placeholder="Ваш телефон">
+                    <input class="form-control" type="email" name="email" 
+                    placeholder="Ваш email">
 
                     <button class="btn btn-primary btn-block">
                         Отправить
                     </button>
                 </form>
             </div>
-
+            {% with messages = get_flashed_messages()  %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+              </button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
           </div>
     </section>

@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %} {{title}} {% endblock %}
+    
+{% block body %}
+{% include 'menu.html' %}
+
+<section class="catalog-section py-5 container-lg">
+<div class="container text-center mt-5">
+    <div class="row align-items-center">
+        <div class="col-12 col-md-4 mb-2">
+          <div class="card text-start">
+              <div class="card-body">
+                <h5 class="card-title">Заявки на обработку данных</h5>
+              </div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between"><a href="#" class="card-link">Студии</a><span>0</span></li>
+                <li class="list-group-item d-flex justify-content-between"><a href="#" class="card-link">1 комнатные</a><span>0</span></li>
+                <li class="list-group-item d-flex justify-content-between"><a href="#" class="card-link">2 комнатные</a><span>0</span></li>
+                <li class="list-group-item d-flex justify-content-between"><a href="#" class="card-link">3 комнатные</a><span>0</span></li>
+                <li class="list-group-item d-flex justify-content-between"><a href="#" class="card-link">4 комнатные и более</a><span>0</span></li>
+              </ul>
+            </div>
+        </div>
+        <div class="col-12 col-md-4 mb-2">
+            <div class="card text-start">
+                {% for dp in data_profile %}
+                <div class="card-body">
+                    <h5 class="card-title">Профиль</h5>
+                </div>
+                  <ul class="list list-unstyled mt-2">
+                      <li class="d-flex justify-content-between border-bottom" 
+                      style="font-size:25px; margin:10px">
+                        <div class="me-3">Логин</div>
+                        <div>{{dp.username}}</div>
+                      </li>
+                      <li class="d-flex justify-content-between border-bottom"
+                      style="font-size:25px; margin:10px">
+                        <div class="me-3">Фамилия</div>
+                        <div>{{dp.fname}}</div>
+                      </li>
+                      <li class="d-flex justify-content-between border-bottom"
+                      style="font-size:25px; margin:10px">
+                        <div class="me-3">Имя</div>
+                        <div>{{dp.lname}}</div>
+                      </li>
+                      <li class="d-flex justify-content-between border-bottom"
+                      style="font-size:25px; margin:10px">
+                        <div class="me-3">Телефон</div>
+                        <div>{{dp.phone}}</div>
+                      </li>
+                      <li class="d-flex justify-content-between border-bottom"
+                      style="font-size:25px; margin:10px">
+                        <div class="me-3">Email</div>
+                        <div>{{dp.email}}</div>
+                      </li>
+                    </ul>
+                  {% endfor %}
+              </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
